@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAZREZ GROUP - Интерактивті Стратегиялық Есеп</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Corporate Calm -->
+    <!-- Application Structure Plan: The application is designed as a single-page interactive dashboard. This structure allows for a clear and logical flow of information, starting from high-level key metrics, moving to a detailed audience analysis, then presenting the actionable content strategy and weekly plan, and finally an interactive budget calculator. This non-linear dashboard approach was chosen over a simple linear report to allow users to quickly access the section most relevant to them and interact with data (like the budget) to understand cause and effect, which is more engaging and insightful for strategic planning. -->
+    <!-- Visualization & Content Choices:
+    - Key Metrics: Goal: Inform. Method: Stat cards with large numbers. Justification: Provides a quick, scannable overview of performance.
+    - Audience Analysis: Goal: Inform/Compare. Method: Donut and Bar charts (Chart.js). Justification: Visualizes demographic distributions much more effectively than tables or text, making it easy to understand the audience composition at a glance.
+    - Content Strategy: Goal: Organize. Method: Titled cards in a two-column grid. Justification: Clearly separates Reels and Stories strategies for easy comparison.
+    - Weekly Plan: Goal: Organize. Method: An interactive tabbed view showing a weekly calendar for Reels and Stories. Justification: Makes the abstract weekly schedule concrete and easy to follow.
+    - Budget Plan: Goal: Compare/Interact. Method: Interactive buttons that update stat cards and a donut chart. Justification: This is the core interactive element. It allows users to dynamically explore different budget scenarios and immediately see the potential impact, which is crucial for decision-making.
+    - Library: Chart.js for all visualizations.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-button.active {
+            border-bottom-color: #3b82f6; /* blue-500 */
+            color: #1e3a8a; /* blue-900 */
+        }
+        .plan-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .budget-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .budget-button.selected {
+            background-color: #1e40af !important;
+            color: #ffffff !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900">
+                KAZREZ GROUP
+            </h1>
+            <div class="text-sm text-slate-600 font-medium hidden sm:block">
+                Instagram-ды Дамыту Стратегиясы
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <section id="overview" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-900">Стратегиялық шолу</h2>
+            <p class="text-center text-slate-500 text-md -mt-1 mb-8">by Amantay Bagdat</p>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">Бұл бөлімде Instagram парақшасының негізгі көрсеткіштері, мақсатты аудитория сипаттамасы, контент-стратегия және бюджет жоспарымен таныса аласыз.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="text-5xl font-bold text-blue-600 mb-2" id="stat-impressions">166.2K+</div>
+                    <div class="text-slate-600 font-medium">Қаралым саны (1 ай)</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="text-5xl font-bold text-green-600 mb-2" id="stat-followers">+358</div>
+                    <div class="text-slate-600 font-medium">Жаңа оқырмандар</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="text-5xl font-bold text-purple-600 mb-2" id="stat-interactions">956</div>
+                    <div class="text-slate-600 font-medium">Белсенділік</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="text-5xl font-bold text-red-600 mb-2" id="stat-reels-engagement">88.8%</div>
+                    <div class="text-slate-600 font-medium">Reels үлесі</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="audience" class="mb-12 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-900">Аудитория Портреті</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">Мақсатты аудиториямызды тереңірек түсіну үшін негізгі демографиялық көрсеткіштерді талдайық. Бұл бізге контентті дәл бағыттауға көмектеседі.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="w-full">
+                    <h3 class="text-xl font-semibold text-center mb-4 text-slate-800">Жынысы және жас ерекшелігі</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="chart-container h-[250px] md:h-auto max-w-[250px]">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                        <div class="chart-container h-[250px] md:h-[300px] max-w-full">
+                            <canvas id="ageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full">
+                     <h3 class="text-xl font-semibold text-center mb-4 text-slate-800">Негізгі қалалар</h3>
+                    <div class="chart-container h-[300px] md:h-[350px]">
+                        <canvas id="cityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-900">Контент-Стратегия</h2>
+             <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">Бренд танымалдылығын арттыру, сенім қалыптастыру және сатылымды ынталандыру үшін Reels және Stories форматтарын тиімді пайдалану жоспары.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg plan-card">
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 flex items-center">
+                        <span class="mr-3 text-3xl">🎬</span> Reels (Аптасына 2-3)
+                    </h3>
+                    <ul class="space-y-3 list-disc list-inside text-slate-700">
+                        <li><b>"До/После" форматы:</b> Шинаны жаңарту процесін көрнекі түрде көрсету.</li>
+                        <li><b>Пайдалы кеңестер:</b> Шина таңдау, ауыстыру, күтім туралы қысқа видеолар.</li>
+                        <li><b>Процесс:</b> Ірі техниканың шинасын ауыстыру сияқты қызықты сәттер.</li>
+                        <li><b>Сұрақ-Жауап:</b> Жиі қойылатын сұрақтарға видео-жауап.</li>
+                        <li><b>Клиент пікірі:</b> Риза болған клиенттердің шынайы пікірі.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg plan-card">
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 flex items-center">
+                         <span class="mr-3 text-3xl">📱</span> Stories (Күніне 2-3)
+                    </h3>
+                    <ul class="space-y-3 list-disc list-inside text-slate-700">
+                        <li><b>Интерактив:</b> Сауалнама, тест, сұрақ-жауап арқылы белсенділікті арттыру.</li>
+                        <li><b>"Behind the scenes":</b> Күнделікті жұмыс процесінен қысқа видеолар.</li>
+                        <li><b>Кері байланыс:</b> Клиенттердің пікірлерін көрсету.</li>
+                        <li><b>Сатылым:</b> WhatsApp-қа тікелей сілтеме арқылы арнайы ұсыныстар беру.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="weekly-plan" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-900">Апталық Жоспар</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">Стратегияны іске асыруға арналған нақты, апталық контент-жоспар кестесі. Төмендегі батырмалар арқылы Reels және Stories жоспарларын бөлек көре аласыз.</p>
+             <div class="flex justify-center border-b border-slate-200 mb-6">
+                <button data-target="#reels-plan-content" class="plan-tab-btn nav-button active px-6 py-3 text-lg font-semibold text-slate-600">Reels Жоспары</button>
+                <button data-target="#stories-plan-content" class="plan-tab-btn nav-button px-6 py-3 text-lg font-semibold text-slate-600">Stories Жоспары</button>
+            </div>
+            <div id="reels-plan-content" class="plan-tab-content">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto">
+                        <h4 class="font-bold text-lg mb-2 border-b pb-2">Сәрсенбі</h4>
+                        <p class="text-slate-700"><b>Reels 1: "До/После".</b> Жүк көлігінің тозған шинасын жаңарту процесін динамикалық видеода көрсету.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto">
+                        <h4 class="font-bold text-lg mb-2 border-b pb-2">Жұма</h4>
+                        <p class="text-slate-700"><b>Reels 2: Клиент пікірі.</b> Риза болған клиентпен қысқа сұхбат түсіріп, шынайы эмоциясын көрсету.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="stories-plan-content" class="plan-tab-content hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Дүйсенбі</h4>
+                        <p class="text-sm text-slate-700"><b>Таң:</b> Интерактив (сауалнама). <br><b>Кеш:</b> Дайын тапсырыстар видеосы.</p>
+                    </div>
+                     <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Сейсенбі</h4>
+                        <p class="text-sm text-slate-700"><b>Таң:</b> Сұрақ-жауап. <br><b>Кеш:</b> Клиент пікірі (скриншот) + WhatsApp сілтемесі.</p>
+                    </div>
+                     <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Сәрсенбі</h4>
+                        <p class="text-sm text-slate-700">Жаңа Reels-ті қолдау, процесс туралы сұрау.</p>
+                    </div>
+                     <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Бейсенбі</h4>
+                        <p class="text-sm text-slate-700"><b>Таң:</b> Пайдалы кеңес. <br><b>Кеш:</b> Таргетке арналған Story (Тегін консультация).</p>
+                    </div>
+                     <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Жұма</h4>
+                        <p class="text-sm text-slate-700">Жаңа Reels-ті қолдау, клиентке алғыс айту.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Сенбі</h4>
+                        <p class="text-sm text-slate-700">Команданың жұмыс сәті + Арнайы ұсыныс.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-md">
+                        <h4 class="font-bold text-md mb-2 border-b pb-2">Жексенбі</h4>
+                        <p class="text-sm text-slate-700">Аптаны қорытындылау, үздік жұмысты көрсету.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="budget" class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-900">Бюджет және Болжам</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">Интерактивті калькулятор арқылы әр түрлі бюджеттік жоспарлардың мүмкіндіктерін зерттеңіз. Жоспарды таңдау арқылы айлық, күнделікті шығындарды және қаражаттың бөлінуін көре аласыз.</p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="budget-button selected bg-blue-500 text-white font-bold py-3 px-8 rounded-full" onclick="updateBudget('start')">Старт</button>
+                <button class="budget-button bg-slate-200 text-slate-800 font-bold py-3 px-8 rounded-full" onclick="updateBudget('optimal')">Оптимал</button>
+                <button class="budget-button bg-slate-200 text-slate-800 font-bold py-3 px-8 rounded-full" onclick="updateBudget('max')">Максимум</button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                            <div class="text-slate-500 mb-2 font-medium">Айлық бюджет</div>
+                            <div id="monthly-budget" class="text-4xl font-bold text-slate-900"></div>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                            <div class="text-slate-500 mb-2 font-medium">Күнделікті шығын</div>
+                            <div id="daily-budget" class="text-4xl font-bold text-slate-900"></div>
+                        </div>
+                    </div>
+                     <div class="mt-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <h4 class="font-semibold text-lg mb-2 text-slate-800">Болжамды нәтиже:</h4>
+                        <p id="forecast-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-center mb-4 text-slate-800">Бюджеттің бөлінуі</h3>
+                    <div class="chart-container h-[280px] md:h-[320px]">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center text-slate-400">
+            <p>&copy; 2025 KAZREZ GROUP. Интерактивті есеп.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const audienceData = {
+                gender: {
+                    labels: ['Ерлер', 'Әйелдер'],
+                    data: [96.1, 3.9]
+                },
+                age: {
+                    labels: ['18-24', '25-34', '35-44', '45-54'],
+                    data: [7.9, 41.7, 38.3, 8.4]
+                },
+                city: {
+                    labels: ['Алматы', 'Астана', 'Шымкент', 'Ақтөбе'],
+                    data: [26.8, 10.6, 6.5, 5.7]
+                }
+            };
+
+            const budgetData = {
+                start: { monthly: '80K - 100K ₸', daily: '~3,000 ₸', forecast: 'Тұрақты өсім, сатылымды +15%-ға дейін арттыру.', split: [60, 40] },
+                optimal: { monthly: '120K - 150K ₸', daily: '~4,500 ₸', forecast: 'Сатылымды +30%-ға дейін арттыру, жаңа аудиторияны белсенді тарту.', split: [65, 35] },
+                max: { monthly: '200K+ ₸', daily: '~6,700+ ₸', forecast: 'Нарықта үстемдік, бәсекелестерден озу, жылдам өсу.', split: [70, 30] }
+            };
+
+            const chartColors = {
+                blue: 'rgba(59, 130, 246, 0.8)',
+                blue_bg: 'rgba(59, 130, 246, 0.2)',
+                purple: 'rgba(139, 92, 246, 0.8)',
+                purple_bg: 'rgba(139, 92, 246, 0.2)',
+                pink: 'rgba(236, 72, 153, 0.8)',
+                pink_bg: 'rgba(236, 72, 153, 0.2)',
+                teal: 'rgba(20, 184, 166, 0.8)',
+                teal_bg: 'rgba(20, 184, 166, 0.2)',
+            };
+            
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 12 },
+                            color: '#475569'
+                        }
+                    }
+                }
+            };
+
+            const genderCtx = document.getElementById('genderChart').getContext('2d');
+            new Chart(genderCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: audienceData.gender.labels,
+                    datasets: [{
+                        label: 'Жынысы',
+                        data: audienceData.gender.data,
+                        backgroundColor: [chartColors.blue, chartColors.pink],
+                        borderColor: '#f8fafc',
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...commonChartOptions }
+            });
+
+            const ageCtx = document.getElementById('ageChart').getContext('2d');
+            new Chart(ageCtx, {
+                type: 'bar',
+                data: {
+                    labels: audienceData.age.labels,
+                    datasets: [{
+                        label: 'Жас аралығы (%)',
+                        data: audienceData.age.data,
+                        backgroundColor: chartColors.purple_bg,
+                        borderColor: chartColors.purple,
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+
+            const cityCtx = document.getElementById('cityChart').getContext('2d');
+            new Chart(cityCtx, {
+                type: 'bar',
+                data: {
+                    labels: audienceData.city.labels,
+                    datasets: [{
+                        label: 'Қалалар үлесі (%)',
+                        data: audienceData.city.data,
+                        backgroundColor: chartColors.teal_bg,
+                        borderColor: chartColors.teal,
+                        borderWidth: 2,
+                        borderRadius: 5,
+                    }]
+                },
+                 options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+            const budgetChart = new Chart(budgetCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reels Таргет', 'Stories Таргет'],
+                    datasets: [{
+                        data: budgetData.start.split,
+                        backgroundColor: [chartColors.blue, chartColors.purple],
+                        borderColor: '#ffffff',
+                        borderWidth: 4,
+                    }]
+                },
+                options: { ...commonChartOptions }
+            });
+
+            window.updateBudget = (plan) => {
+                const planData = budgetData[plan];
+                document.getElementById('monthly-budget').innerText = planData.monthly;
+                document.getElementById('daily-budget').innerText = planData.daily;
+                document.getElementById('forecast-text').innerText = planData.forecast;
+
+                budgetChart.data.datasets[0].data = planData.split;
+                budgetChart.update();
+
+                document.querySelectorAll('.budget-button').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                event.currentTarget.classList.add('selected');
+            };
+
+            updateBudget('start');
+
+            const tabButtons = document.querySelectorAll('.plan-tab-btn');
+            const tabContents = document.querySelectorAll('.plan-tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const targetId = button.dataset.target;
+                    const targetContent = document.querySelector(targetId);
+
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    if(targetContent) {
+                        targetContent.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
